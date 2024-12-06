@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - MakeupConnect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-pink-100 to-purple-200 min-h-screen flex items-center justify-center p-4">
+<div class="bg-white rounded-xl shadow-2xl flex flex-col md:flex-row w-full max-w-4xl overflow-hidden">
+    <div class="bg-purple-600 text-white p-8 md:w-1/2 flex flex-col justify-center items-center text-center">
+        <h1 class="text-4xl font-bold mb-4">MakeupConnect</h1>
+        <p class="text-xl mb-8">Join us and connect with Makeup Artists and Models</p>
+        <img src="https://images.unsplash.com/photo-1596704017254-9b121068fb31?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80" alt="Makeup Artist" class="rounded-full w-48 h-48 object-cover shadow-lg">
+    </div>
+    <div class="p-8 md:w-1/2">
+        <h2 class="text-3xl font-semibold mb-6 text-center">Registry account</h2>
+        <form id="registerForm" action="/v1/register" method="post" class="space-y-4">
+            <div>
+                <label for="fullname" class="block text-sm font-medium text-gray-700">Full name</label>
+                <input type="text" id="fullname" name="fullname" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500" placeholder="Họ và tên">
+            </div>
+
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" id="email" name="email" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500" placeholder="Email">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">You are? </label>
+                <div class="mt-1 flex space-x-4">
+                    <div class="flex items-center">
+                        <input type="radio" id="role-customer" name="role" value="customer" required class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300">
+                        <label for="role-customer" class="ml-2 text-sm font-medium text-gray-700">Customer</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="radio" id="role-model-artist" name="role" value="model-artist" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300">
+                        <label for="role-model-artist" class="ml-2 text-sm font-medium text-gray-700">Model</label>
+                    </div>
+<!--                    <div class="flex items-center">-->
+<!--                        <input type="radio" id="role-makeup-artist" name="role" value="makeup-artist" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300">-->
+<!--                        <label for="role-makeup-artist" class="ml-2 text-sm font-medium text-gray-700">Makeup Artist</label>-->
+<!--                    </div>-->
+                </div>
+            </div>
+
+            <div>
+                <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                <input type="text" id="userName" name="username" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500" placeholder="Tên đăng nhập">
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                <div class="relative">
+                    <input type="password" id="password" name="password" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500" placeholder="Mật khẩu">
+                    <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5" onclick="togglePassword()">
+                        <img id="password-icon" src="/img/hide-password.svg" alt="Toggle Password" class="h-5 w-5">
+                    </button>
+                </div>
+            </div>
+
+            <div>
+                <label for="confirm-password" class="block text-sm font-medium text-gray-700">Enter password again</label>
+                <div class="relative">
+                    <input type="password" id="confirm-password" name="confirmPassword" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500" placeholder="Nhập lại mật khẩu">
+                    <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5" onclick="toggleConfirmPassword()">
+                        <img id="confirm-password-icon" src="/img/hide-password.svg" alt="Toggle Password" class="h-5 w-5">
+                    </button>
+
+                    <p id="error-message" class="text-red-500 text-sm mt-2 hidden">Passwords do not match, please check again.</p>
+                </div>
+            </div>
+
+            <div>
+                <button  type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-150 ease-in-out">
+                    Registry
+                </button>
+            </div>
+        </form>
+        <p class="mt-8 text-center text-sm text-gray-600">
+            Already have an account?
+            <a href="/login" class="font-medium text-purple-600 hover:text-purple-500">Login</a>
+        </p>
+    </div>
+</div>
+
+<script>
+    // document.querySelector('form').addEventListener('submit', function(event) {
+    //     event.preventDefault();
+    //
+    //     let password = document.getElementById('password').value;
+    //     let confirmPassword = document.getElementById('confirm-password').value;
+    //     if (password !== confirmPassword) {
+    //         document.getElementById('error-message').classList.remove('hidden');
+    //     } else {
+    //         document.getElementById('error-message').classList.add('hidden');
+    //         this.submit();
+    //     }
+    // });
+
+    document.querySelector('form').addEventListener('submit',function submitForm(event) {
+        event.preventDefault();
+
+        const formData = {
+            username: document.getElementById('userName').value,
+            password: document.getElementById('password').value,
+            email: document.getElementById('email').value,
+            role: document.querySelector('input[name="role"]:checked').value
+        };
+
+        fetch('http://localhost:8080/v1/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+            .then(response => {
+                if (response.ok) {
+                    response.json();
+                    window.location.href = '/login';
+                } else {
+                    console.error('Đăng ký thất bại');
+                }
+            })
+            .then(data => console.log(data))
+            .catch(error => console.error('Error:', error));
+    })
+</script>
+</body>
+</html>

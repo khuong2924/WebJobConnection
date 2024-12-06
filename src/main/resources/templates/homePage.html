@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MakeupConnect Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script th:src="'https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js'"></script>
+    <!-- Thêm jQuery từ CDN -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+</head>
+<body class="bg-gray-50">
+<nav class="bg-white shadow-lg fixed w-full top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4">
+        <div class="flex justify-center space-x-12 py-4">
+            <a href="/home">
+                <img src="img/home.png" alt="Home"
+                     class="h-6 w-6 transition-transform duration-1000 transform hover:scale-110">
+            </a>
+            <a href="/profile">
+                <img src="/img/user.png" alt="Profile"
+                     class="h-6 w-6 transition-transform duration-1000 transform hover:scale-110">
+            </a>
+            <a href="/schedule">
+                <img src="/img/alarm.png" alt="Notify"
+                     class="h-6 w-6 transition-transform duration-1000 transform hover:scale-110">
+            </a>
+            <a href="/chatbot">
+                <img src="/img/message.png" alt="Notify"
+                     class="h-6 w-6 transition-transform duration-1000 transform hover:scale-110">
+            </a>
+            <a href="#" onclick="confirmLogout(event);" class="ml-auto">
+                <img src="../img/log_out.png" alt="Logout"
+                     class="h-6 w-6 transition-transform duration-1000 transform hover:scale-110">
+            </a>
+            <form id="logoutForm" action="/logout" method="POST" style="display: none;">
+            </form>
+        </div>
+
+    </div>
+</nav>
+
+<div class="mt-20 max-w-6xl mx-auto px-4">
+    <div class="flex gap-6">
+        <!-- Left Sidebar -->
+        <div class="w-1/4">
+            <div class="relative inline-block w-full">
+                <button onclick="document.getElementById('registrationsList').classList.toggle('hidden'); document.getElementById('bookingButton').classList.toggle('mt-48')"
+                        class="w-full mb-4 bg-gradient-to-r from-pink-500 to-purple-500 text-white py-3 px-4 rounded-lg hover:from-pink-600 hover:to-purple-600 flex items-center justify-center transition-all duration-1000">
+                    <span class="flex-1 text-center">Your canceled jobs</span>
+                    <span class="ml-2">▼</span>
+                </button>
+                <div id="registrationsList"
+                     class="hidden absolute z-10 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1">
+                    <ul class="py-2" th:if="${userCanceled != null}">
+                        <li onclick="toggleDetails(this)"
+                            class="group relative px-4 py-3 hover:bg-purple-50 cursor-pointer border-b border-gray-100">
+                            <div class="flex justify-between items-center">
+                                <span class="font-medium" th:text="'Booking for: ' + ${userCanceled.fullName}"></span>
+                            </div>
+                            <div class="hidden group-hover:block absolute left-0 mt-2 w-72 bg-white border border-gray-200 rounded-lg shadow-xl p-4 z-20">
+                                <div class="flex items-center mb-3">
+                                    <img th:src="${userCanceled != null ? userCanceled.portfolioPhoto : 'default_image_url'}"
+                                         class="w-10 h-10 rounded-full">
+                                    <div class="ml-3">
+                                        <h4 class="font-semibold" th:text="${userCanceled.fullName}"></h4>
+                                        <p class="text-sm text-gray-500" th:text="'@' + ${userCanceled.user_id}"></p>
+                                    </div>
+                                </div>
+<!--                                <div class="space-y-2 text-sm">-->
+<!--                                    <p><span class="font-medium">Email:</span> <span th:text="${user_canceled.}"></span></p>-->
+<!--                                    <p><span class="font-medium">Phone:</span> <span th:text="${user_canceled.phone}"></span></p>-->
+<!--                                    <p><span class="font-medium">Address:</span> <span th:text="${user_canceled.address}"></span></p>-->
+<!--                                </div>-->
+                            </div>
+                        </li>
+                    </ul>
+                    <p class="text-gray-500 text-sm text-center py-4" th:if="${userCanceled == null}">
+                        No canceled user to display.
+                    </p>
+                </div>
+
+
+                <button id="bookingButton"
+                        class="w-full mb-4 bg-gradient-to-r from-pink-500 to-purple-500 text-white py-3 px-4 rounded-lg hover:from-pink-600 hover:to-purple-600 flex items-center justify-center transition-all duration-1000 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg transition-all duration-1000 focus:ring-4 focus:ring-indigo-300 focus:outline-none"
+                        onclick="document.getElementById('userDataContainer').classList.toggle('hidden')">
+                    <span class="flex-1 text-center">View list register in your post</span>
+                    <span class="ml-2">▼</span>
+                </button>
+
+
+
+                <div id="userDataContainer" class="hidden mt-8 grid gap-6 grid-cols-1" role="region"
+                     aria-label="User data list">
+                    <div th:each="info : ${infos}"
+                         class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-1000"
+                         tabindex="0">
+                        <img th:src="${info.applyImage}" alt="User profile"
+                             class="w-full h-48 object-cover rounded-lg mb-4">
+                        <a  th:href="@{/profile/{userId}(userId=${info.user.id})}"
+                                th:text="${info.user.username}"
+                            class="text-xl font-semibold text-gray-800 mb-2"></a>
+                        <p th:text="${info.applyContent}" class="text-gray-600 mb-4"></p>
+                        <div class="flex justify-between items-center text-sm text-gray-500 mb-4">
+                            <span th:text="'Job Post title: ' + ${info.jobPost.title}"></span>
+                        </div>
+                        <div class="flex gap-4">
+                            <form th:action="@{/accept}" method="post" class="w-1/2">
+                                <input type="hidden" th:name="jobPostId" th:value="${info.jobPost.id}">
+                                <input type="hidden" th:name="userId" th:value="${info.user.id}">
+                                <button type="submit"
+                                        class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-1000">
+                                    Accept
+                                </button>
+                            </form>
+                            <button class="w-1/2 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-1000">
+                                Refuse
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+        </div>
+
+        <!-- Main Content -->
+        <div class="w-1/2">
+            <!-- Banner -->
+            <div class="mb-6 rounded-xl overflow-hidden relative w-full h-48">
+                <div id="bannerCarousel" class="flex transition-transform duration-1000 ease-in-out">
+                    <img src="https://studiochupanhdep.com/Upload/Images/Album/anh-poster-2022.jpg" alt="Makeup Banner 1"
+                         class="w-full h-48 object-cover flex-shrink-0">
+                    <img src="https://bizweb.dktcdn.net/100/439/842/files/vi-sao-nen-lua-chon-thuong-hieu-makeup-noi-dia-trung.jpg?v=1726718435902" alt="Makeup Banner 2"
+                         class="w-full h-48 object-cover flex-shrink-0">
+                    <img src="https://bizweb.dktcdn.net/100/439/842/files/herborist-makeup-noi-dia-trung.jpg?v=1726721131514" alt="Makeup Banner 2"
+                         class="w-full h-48 object-cover flex-shrink-0">
+                </div>
+            </div>
+            <script>
+                let currentBannerIndex = 0;
+                const bannerCarousel = document.getElementById("bannerCarousel");
+                const bannerCount = bannerCarousel.children.length;
+
+                function showNextBanner() {
+                    currentBannerIndex = (currentBannerIndex + 1) % bannerCount;
+                    bannerCarousel.style.transform = `translateX(-${currentBannerIndex * 100}%)`;
+                }
+
+                setInterval(showNextBanner, 5000);
+            </script>
+            <div class="bg-white p-4 rounded-lg shadow-md mb-6">
+                <h2 class="text-xl font-bold mb-6">Post</h2>
+                <button onclick="document.getElementById('createPost').classList.remove('hidden')"
+                        class="w-full bg-gray-50 hover:bg-gray-100 text-gray-500 font-medium px-6 py-4 rounded-lg border-2 border-dashed border-gray-300 transform transition-all duration-1000 hover:border-gray-400 text-left">
+                    Enter your post here...
+                </button>
+            </div>
+
+            <div id="createPost"
+                 class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+                <div class="relative top-10 mx-auto p-8 w-full max-w-2xl bg-white rounded-xl shadow-2xl transform transition-all">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">New Post</h2>
+                        <button onclick="document.getElementById('createPost').classList.add('hidden')"
+                                class="text-gray-600 hover:text-gray-800">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <form th:action="@{/create}" action="#" method="post" class="space-y-6"
+                          enctype="multipart/form-data">
+                        <div class="space-y-4">
+                            <div>
+                                <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
+                                <input type="text" id="title" name="title"
+                                       placeholder="Enter your title of job"
+                                       class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+
+                            <div>
+                                <label for="description" class="block text-sm font-medium text-gray-700">Content of
+                                    Job</label>
+                                <textarea id="description" name="description" rows="4"
+                                          placeholder="Enter your description of job"
+                                          class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="time" class="block text-sm font-medium text-gray-700">Time</label>
+                                    <input type="datetime-local" id="time" name="time"
+                                           class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+
+                                <div>
+                                    <label for="style" class="block text-sm font-medium text-gray-700">Type
+                                        makeup</label>
+                                    <input type="text" id="style" name="style" placeholder="Enter your type of makeup"
+                                           class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="location"
+                                           class="block text-sm font-medium text-gray-700">Location</label>
+                                    <input type="text" id="location" name="location" placeholder="Location"
+                                           class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label for="cost" class="block text-sm font-medium text-gray-700">Cost</label>
+                                    <input type="number" id="cost" name="cost" placeholder="Cost"
+                                           class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                                <input type="file" name="file" id="photos" accept="image/*" class="hidden"
+                                       onchange="previewImages()">
+                                <label for="photos" class="cursor-pointer">
+                                    <div class="space-y-2">
+                                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none"
+                                             viewBox="0 0 48 48">
+                                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        <div class="text-sm text-gray-600">Import images of your post here...
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- Khu vực hiển thị ảnh đã chọn -->
+                            <div id="imagePreview" class="grid grid-cols-3 gap-4 hidden">
+                                <!-- Các ảnh sẽ hiển thị ở đây -->
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end space-x-4">
+                            <button type="button"
+                                    onclick="document.getElementById('createPost').classList.add('hidden')"
+                                    class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400">
+                                Cancel
+                            </button>
+                            <button type="submit"
+                                    class="px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-lg hover:from-pink-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                Post
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
+
+            <!-- Search Filters -->
+            <!--            <div class="bg-white p-4 rounded-lg shadow-md mb-6">-->
+            <!--                <div class="grid grid-cols-2 gap-4">-->
+            <!--                    <form action="/search" method="get"> &lt;!&ndash; Thay đổi ở đây, form POST hoặc GET &ndash;&gt;-->
+            <!--                        <input class="border p-2 rounded bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200 hover:bg-pink-50 cursor-pointer"-->
+            <!--                               placeholder="Job type" name="jobType"/>-->
+
+            <!--                        <input type="date" name="date"-->
+            <!--                               class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-pink-500 transition duration-200 bg-white hover:bg-pink-50 cursor-pointer">-->
+
+            <!--                        <input type="number" placeholder="Chi phí thấp nhất" name="startSalary"-->
+            <!--                               class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200 hover:bg-pink-50 cursor-pointer">-->
+
+            <!--                        <input type="number" placeholder="Chi phí cao nhất" name="endSalary"-->
+            <!--                               class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200 hover:bg-pink-50 cursor-pointer">-->
+
+            <!--                        <button type="submit"-->
+            <!--                                class="w-full mt-4 bg-gradient-to-r from-pink-500 to-purple-500 text-white py-2 rounded hover:from-pink-600 hover:to-purple-600 transition-all duration-300">-->
+            <!--                            Tìm kiếm-->
+            <!--                        </button>-->
+            <!--                    </form>-->
+            <!--                </div>-->
+            <!--            </div>-->
+
+            <div class="bg-white p-4 rounded-lg shadow-md mb-6">
+                <div class="grid grid-cols-1 gap-4"> <!-- Chuyển sang grid-cols-1 để form chiếm toàn bộ chiều rộng -->
+                    <form action="/search" method="get">
+                        <div class="flex gap-4"> <!-- Dùng Flexbox cho jobType và date ở cùng một hàng -->
+                            <input class="border p-2 rounded bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-1000 hover:bg-pink-50 cursor-pointer flex-1"
+                                   placeholder="Job type" name="jobType"/>
+
+                            <input type="date" name="date"
+                                   class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-pink-500 transition duration-1000 bg-white hover:bg-pink-50 cursor-pointer flex-1">
+                        </div>
+
+                        <div class="flex gap-4 mt-4"> <!-- Dùng Flexbox cho startSalary và endSalary ở cùng một hàng -->
+                            <input type="number" placeholder="Lowest Cost" name="startSalary"
+                                   class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-1000 hover:bg-pink-50 cursor-pointer flex-1">
+
+                            <input type="number" placeholder="Highest Cost" name="endSalary"
+                                   class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-1000 hover:bg-pink-50 cursor-pointer flex-1">
+                        </div>
+
+                        <button type="submit"
+                                class="w-full mt-4 bg-gradient-to-r from-pink-500 to-purple-500 text-white py-2 rounded hover:from-pink-600 hover:to-purple-600 transition-all duration-1000">
+                            Search
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+<!--            &lt;!&ndash; Modal &ndash;&gt;-->
+<!--            <div id="confirmModal"-->
+<!--                 class=" fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden">-->
+<!--                <form action="/follow" enctype="multipart/form-data" method="post"-->
+<!--                      class="space-y-6 bg-white p-6 rounded-lg shadow-lg z-100">-->
+<!--                    <div>-->
+<!--                        <label for="textInput" class="block text-sm font-medium text-gray-700 mb-2">Apply-->
+<!--                            Content</label>-->
+<!--                        <input type="text" id="textInput" name="content" required-->
+<!--                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"-->
+<!--                               placeholder="Enter your content here">-->
+<!--                    </div>-->
+<!--                    <div>-->
+<!--                        <label for="imageInput" class="block text-sm font-medium text-gray-700 mb-2">Apply-->
+<!--                            Images</label>-->
+<!--                        <div class="relative">-->
+<!--                            <input type="file" id="imageInput" name="image" accept="image/*" class="hidden">-->
+<!--                            <label for="imageInput"-->
+<!--                                   class="w-full flex items-center justify-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 cursor-pointer transition-colors">-->
+<!--                                <div class="text-center">-->
+<!--                                    <i class="fas fa-cloud-upload-alt text-2xl text-gray-400 mb-2"></i>-->
+<!--                                    <p class="text-sm text-gray-500">Click to upload or drag and drop</p>-->
+<!--                                </div>-->
+<!--                            </label>-->
+<!--                        </div>-->
+<!--                    </div>-->
+
+<!--                    <div class="flex justify-end gap-4">-->
+<!--                        <button type="button" id="cancelButton"-->
+<!--                                class="w-full text-white bg-gray-500 hover:bg-gray-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center">-->
+<!--                            Cancel-->
+<!--                        </button>-->
+<!--                        <button type="submit" id="confirmButton"-->
+<!--                                class="w-full text-white bg-blue-500 hover:bg-blue-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center">-->
+<!--                            Apply-->
+<!--                        </button>-->
+<!--                    </div>-->
+<!--                </form>-->
+<!--            </div>-->
+<!--            <script>-->
+<!--                document.addEventListener('DOMContentLoaded', function () {-->
+<!--                    const textInput = document.getElementById('textInput');-->
+<!--                    const imageInput = document.getElementById('imageInput');-->
+<!--                    const followForm = document.querySelector('form[action="/follow"]');-->
+
+<!--                    // Lấy input ẩn sẵn có-->
+<!--                    const contentHiddenInput = followForm.querySelector('input[name="contentHidden"]');-->
+<!--                    const imageHiddenInput = followForm.querySelector('input[name="imageHidden"]');-->
+
+<!--                    // Lắng nghe sự kiện onchange của text input-->
+<!--                    textInput.addEventListener('input', function () {-->
+<!--                        contentHiddenInput.value = textInput.value; // Cập nhật giá trị cho input ẩn-->
+<!--                    });-->
+
+<!--                    // Lắng nghe sự kiện onchange của image input-->
+<!--                    imageInput.addEventListener('change', function () {-->
+<!--                        if (imageInput.files && imageInput.files[0]) {-->
+<!--                            imageHiddenInput.value = imageInput.files[0].name; // Lưu tên file vào input ẩn-->
+<!--                        } else {-->
+<!--                            imageHiddenInput.value = ''; // Nếu không có file, xóa giá trị-->
+<!--                        }-->
+<!--                    });-->
+<!--                });-->
+<!--            </script>-->
+
+
+            <!-- Posts -->
+            <div class="space-y-6">
+                <div th:each="jobPost : ${jobPosts}">
+                    <div class="bg-white p-4 rounded-lg shadow-md">
+                        <div class="flex items-center mb-4">
+                            <img th:src="@{${jobPost.user.profile.portfolioPhoto}}" class="w-12 h-12 rounded-full"
+                                 alt="User Avatar">
+                            <div class="ml-4">
+                                <a th:href="@{/profile/{userId}(userId=${jobPost.user.id})}"
+                                   class="font-semibold text-blue-600 hover:underline"
+                                   th:text="${jobPost.user.profile.fullName}">
+                                    Sarah Johnson
+                                </a>
+                                <p class="text-gray-500 text-sm" th:text="${jobPost.user.role}">Bridal Makeup Artist</p>
+                            </div>
+
+
+                            <!--                            // button xem thông tin cụ thể của bài đăng:-->
+                            <div class="ml-auto flex gap-2">
+                                <!-- View Detail Button -->
+                                <button th:id="'viewButton-' + ${jobPost.id}"
+                                        class="viewButton text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-md text-xs px-4 py-2 transition duration-1000 ease-in-out hover:scale-105">
+                                    View Detail
+                                </button>
+
+
+                                <!-- Registry Button -->
+                                <button type="submit"
+                                        class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-md text-xs px-4 py-2 transition duration-1000 ease-in-out hover:scale-105 follow-button">
+                                    Registry
+                                </button>
+
+                                <!-- Modal -->
+                                <div id="confirmModal"
+                                     class=" fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden">
+                                    <form action="/follow" enctype="multipart/form-data" method="post"
+                                          class="space-y-6 bg-white p-6 rounded-lg shadow-lg z-100">
+                                        <input type="hidden" name="jobPostId" th:value="${jobPost.id}"/>
+
+                                        <div>
+                                            <label for="textInput" class="block text-sm font-medium text-gray-700 mb-2">Apply
+                                                Content</label>
+                                            <input type="text" id="textInput" name="content" required
+                                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                                   placeholder="Enter your content here">
+                                        </div>
+                                        <div>
+                                            <label for="imageInput" class="block text-sm font-medium text-gray-700 mb-2">Apply
+                                                Images</label>
+                                            <div class="relative">
+                                                <input type="file" id="imageInput" name="image" accept="image/*" class="hidden"onchange="previewImagesRegistry()">
+                                                <label for="imageInput"
+                                                       class="w-full flex items-center justify-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 cursor-pointer transition-colors">
+                                                    <div class="text-center">
+                                                        <i class="fas fa-cloud-upload-alt text-2xl text-gray-400 mb-2"></i>
+                                                        <p class="text-sm text-gray-500">Click to upload or drag and drop</p>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <div id="imagePreviewRegistry" class="grid grid-cols-3 gap-4 hidden">
+                                            <!-- Các ảnh sẽ hiển thị ở đây -->
+                                        </div>
+
+                                        <div class="flex justify-end gap-4">
+                                            <button type="button" id="cancelButton"
+                                                    class="w-full text-white bg-gray-500 hover:bg-gray-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                                                Cancel
+                                            </button>
+                                            <button type="submit" id="confirmButton"
+                                                    class="w-full text-white bg-blue-500 hover:bg-blue-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                                                Apply
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function () {
+                                        const textInput = document.getElementById('textInput');
+                                        const imageInput = document.getElementById('imageInput');
+                                        const followForm = document.querySelector('form[action="/follow"]');
+
+                                        // Lấy input ẩn sẵn có
+                                        const contentHiddenInput = followForm.querySelector('input[name="contentHidden"]');
+                                        const imageHiddenInput = followForm.querySelector('input[name="imageHidden"]');
+
+                                        // Lắng nghe sự kiện onchange của text input
+                                        textInput.addEventListener('input', function () {
+                                            contentHiddenInput.value = textInput.value; // Cập nhật giá trị cho input ẩn
+                                        });
+
+                                        // Lắng nghe sự kiện onchange của image input
+                                        imageInput.addEventListener('change', function () {
+                                            if (imageInput.files && imageInput.files[0]) {
+                                                imageHiddenInput.value = imageInput.files[0].name; // Lưu tên file vào input ẩn
+                                            } else {
+                                                imageHiddenInput.value = ''; // Nếu không có file, xóa giá trị
+                                            }
+                                        });
+                                    });
+                                </script>
+                            </div>
+
+
+                        </div>
+
+                        <img th:src="@{${jobPost.postPhoto}}" class="w-full h-64 object-cover rounded-lg mb-4"
+                             alt="Job Image">
+
+                        <p class="text-gray-700" th:text="${jobPost.description}">
+                            Specializing in elegant bridal makeup. Available for bookings!
+                        </p>
+                    </div>
+
+                    <!--                            Modal view Job Detail:-->
+                    <div th:id="'jobDetailModal-' + ${jobPost.id}"
+                         class="fixed w-1/2 shadow-md inset-x-0 top-40 bottom-40 px-6 flex items-center justify-center bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-1000 transform opacity-0 scale-95 hidden">
+
+                        <div class="p-6 space-y-6">
+                            <div class="flex flex-col md:flex-row gap-6">
+                                <div class="md:w-1/3">
+                                    <img th:src="${jobPost.postPhoto}"
+                                         alt="Job post image" class="w-full h-48 object-cover rounded-lg shadow-md">
+                                </div>
+                                <div class="md:w-2/3 space-y-4">
+                                    <div class="flex items-center gap-3">
+                                        <h2 class="text-2xl font-bold text-gray-800" th:text="${jobPost.title}">Senior Frontend Developer</h2>
+                                        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium" th:text="${jobPost.jobType}">Full-time</span>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <p class="text-gray-600"><span class="font-medium">Posted by:</span> <span th:text="${jobPost.user.profile.fullName}"></span></p>
+                                        <p class="text-gray-600"><span class="font-medium">Location:</span> <span th:text="${jobPost.location}"></span></p>
+                                        <p class="text-gray-600"><span class="font-medium">Salary:</span> <span th:text="${jobPost.salary}"></span></p>
+                                    </div>
+                                    <p class="text-gray-700" th:text="${jobPost.description}">We are seeking an experienced Frontend Developer...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Right Sidebar -->
+        <div class="w-1/4">
+            <div class="bg-white p-6 rounded-lg  h-full overflow-y-auto">
+                <h2 class="font-bold text-xl mb-6">Premium Profiles ⭐</h2>
+                <div class="relative overflow-hidden">
+                    <div id="profileCarousel" class="space-y-6 transition-transform duration-1000">
+                        <!-- Profile 1 -->
+                        <div class="space-y-4 border-2 border-purple-200 p-4 rounded-xl shadow-lg">
+                            <div class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition-all">
+                                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb"
+                                     class="w-14 h-14 rounded-full object-cover">
+                                <div class="ml-4">
+                                    <h4 class="font-semibold text-lg">Lisa Wong</h4>
+                                    <p class="text-sm text-gray-500">Celebrity Makeup Artist</p>
+                                </div>
+                            </div>
+
+                            <div class="rounded-lg overflow-hidden border-2 border-purple-100">
+                                <img src="https://images.unsplash.com/photo-1522337660859-02fbefca4702"
+                                     alt="Lisa's Work"
+                                     class="w-full h-32 object-cover transform hover:scale-105 transition-transform duration-1000">
+                            </div>
+                        </div>
+                        <!-- Profile 2 -->
+                        <div class="space-y-4 border-2 border-purple-200 p-4 rounded-xl ">
+                            <div class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition-all">
+                                <img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04"
+                                     class="w-14 h-14 rounded-full object-cover">
+                                <div class="ml-4">
+                                    <h4 class="font-semibold text-lg">Maria Garcia</h4>
+                                    <p class="text-sm text-gray-500">Fashion Model</p>
+                                </div>
+                            </div>
+                            <div class="rounded-lg overflow-hidden border-2 border-purple-100">
+                                <img src="https://images.unsplash.com/photo-1542596594-649edbc13630" alt="Maria's Work"
+                                     class="w-full h-32 object-cover transform hover:scale-105 transition-transform duration-1000">
+                            </div>
+                        </div>
+                        <!-- Profile 3 -->
+                        <div class="space-y-4 border-2 border-purple-200 p-4 rounded-xl ">
+                            <div class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition-all">
+                                <img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04"
+                                     class="w-14 h-14 rounded-full object-cover">
+                                <div class="ml-4">
+                                    <h4 class="font-semibold text-lg">Khanh Ly</h4>
+                                    <p class="text-sm text-gray-500">Streetwear Model</p>
+                                </div>
+                            </div>
+                            <div class="rounded-lg overflow-hidden border-2 border-purple-100 ">
+                                <img src="https://images.unsplash.com/photo-1542596594-649edbc13630" alt="Ja's Work"
+                                     class="w-full h-32 object-cover transform hover:scale-105 transition-transform duration-1000">
+                            </div>
+                        </div>
+                        <!-- Profile 4 -->
+                        <div class="space-y-4 border-2 border-purple-200 p-4 rounded-xl ">
+                            <div class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition-all">
+                                <img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04"
+                                     class="w-14 h-14 rounded-full object-cover">
+                                <div class="ml-4">
+                                    <h4 class="font-semibold text-lg">Anh Thu</h4>
+                                    <p class="text-sm text-gray-500">Makeup Artist</p>
+                                </div>
+                            </div>
+                            <div class="rounded-lg overflow-hidden border-2 border-purple-100 ">
+                                <img src="https://images.unsplash.com/photo-1542596594-649edbc13630" alt="Ank's Work"
+                                     class="w-full h-32 object-cover transform hover:scale-105 transition-transform duration-1000">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentProfileIndex = 0;
+    const profileCarousel = document.getElementById("profileCarousel");
+    const profileHeight = profileCarousel.children[0].offsetHeight + 24;
+    const profileCount = profileCarousel.children.length;
+
+    function showNextProfilePair() {
+        currentProfileIndex = (currentProfileIndex + 2) % profileCount;
+        profileCarousel.style.transform = `translateY(-${currentProfileIndex * profileHeight}px)`;
+    }
+
+    setInterval(showNextProfilePair, 50000);
+
+
+    function confirmLogout(event) {
+        event.preventDefault();
+        const isConfirmed = confirm("Bạn có chắc muốn đăng xuất?");
+
+        if (isConfirmed) {
+            document.getElementById('logoutForm').submit();
+        }
+    }
+
+    function previewImages() {
+        const input = document.getElementById('photos');
+        const preview = document.getElementById('imagePreview');
+        const files = input.files;
+
+        preview.innerHTML = '';
+
+        if (files.length > 0) {
+            preview.classList.remove('hidden');
+
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.classList.add('w-full', 'h-32', 'object-cover', 'rounded-lg');
+                    preview.appendChild(img);
+                }
+
+                reader.readAsDataURL(file);
+            });
+        }
+    }
+
+
+    // Lấy các thành phần
+    const modal = document.getElementById('confirmModal');
+    const cancelButton = document.getElementById('cancelButton');
+    const confirmButton = document.getElementById('confirmButton');
+    let currentForm = null; // Để lưu form hiện tại
+
+    // Thêm sự kiện cho các nút Follow
+    document.querySelectorAll('.follow-button').forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault(); // Ngăn form gửi ngay lập tức
+            console.log("Nút Follow đã được nhấn!");
+            modal.classList.remove('hidden'); // Hiển thị modal
+            currentForm = button.closest('form'); // Lưu form chứa nút Follow
+            console.log("Đã lưu form: ", currentForm); // Log để kiểm tra form
+        });
+    });
+
+    // Hủy hành động
+    cancelButton.addEventListener('click', () => {
+        modal.classList.add('hidden'); // Ẩn modal
+        currentForm = null; // Xóa form lưu trữ
+        console.log("Đã hủy, form bị xóa: ", currentForm); // Log để kiểm tra
+    });
+
+    // Xác nhận hành động
+    confirmButton.addEventListener('click', () => {
+        if (currentForm) {
+            console.log("Đang gửi form: ", currentForm); // Log trước khi gửi
+            currentForm.submit(); // Gửi form
+            modal.classList.add('hidden'); // Ẩn modal sau khi gửi form
+        } else {
+            console.log("Không có form nào để gửi!"); // Log nếu không có form
+        }
+    });
+
+    function previewImagesRegistry() {
+        const input = document.getElementById('imageInput');
+        const preview = document.getElementById('imagePreviewRegistry');
+        const files = input.files;
+
+        preview.innerHTML = '';
+
+        if (files.length > 0) {
+            preview.classList.remove('hidden');
+
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.classList.add('w-full', 'h-32', 'object-cover', 'rounded-lg');
+                    preview.appendChild(img);
+                }
+
+                reader.readAsDataURL(file);
+            });
+        }
+    }
+
+
+    const viewButton = document.getElementById('viewButton');
+    const infoSection = document.getElementById('jobDetailModal');
+
+    document.querySelectorAll('.viewButton').forEach((button) => {
+        button.addEventListener('click', () => {
+            const jobId = button.id.split('-')[1];
+            const modal = document.getElementById(`jobDetailModal-${jobId}`);
+            console.log(jobId)
+            console.log(modal)
+
+            const isExpanded = button.getAttribute('aria-expanded') === 'true';
+            button.setAttribute('aria-expanded', !isExpanded);
+
+            modal.classList.toggle('hidden');
+            setTimeout(() => {
+                modal.classList.toggle('opacity-0');
+                modal.classList.toggle('scale-95');
+            }, 10);
+        });
+    });
+
+
+
+</script>
+</body>
+</html>

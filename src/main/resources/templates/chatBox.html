@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Interface</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Thêm SockJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+
+    <!-- Thêm STOMP.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+</head>
+<body class="bg-gradient-to-br from-pink-100 to-purple-100">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Interface</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-pink-100 to-purple-100">
+<nav class="bg-white shadow-lg fixed w-full top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4">
+        <div class="flex justify-center space-x-12 py-4">
+            <a href="/home">
+                <img src="img/home.png" alt="Home"
+                     class="h-6 w-6 transition-transform duration-200 transform hover:scale-110">
+            </a>
+            <a href="/profile">
+                <img src="/img/user.png" alt="Profile"
+                     class="h-6 w-6 transition-transform duration-200 transform hover:scale-110">
+            </a>
+            <a href="/schedule">
+                <img src="/img/alarm.png" alt="Notify"
+                     class="h-6 w-6 transition-transform duration-200 transform hover:scale-110">
+            </a>
+            <a href="/chatbot">
+                <img src="/img/message.png" alt="Notify"
+                     class="h-6 w-6 transition-transform duration-200 transform hover:scale-110">
+            </a>
+            <a href="#" onclick="confirmLogout(event);" class="ml-auto">
+                <img src="../img/log_out.png" alt="Logout"
+                     class="h-6 w-6 transition-transform duration-200 transform hover:scale-110">
+            </a>
+            <form id="logoutForm" action="/logout" method="POST" style="display: none;">
+            </form>
+        </div>
+
+    </div>
+</nav>
+
+
+    <div class="container mx-auto p-4 h-screen pt-20 ">
+    <div class="w-full max-w-6xl mx-auto bg-white rounded-lg shadow-lg flex overflow-hidden">
+        <!-- Sidebar -->
+        <div class="w-1/4 border-r border-purple-200 bg-gradient-to-b from-pink-50 to-purple-50">
+            <div class="p-4 border-b">
+                <div class="relative">
+                    <input type="text" placeholder="Search chats..." class="w-full px-4 py-2 rounded-lg bg-purple-50 focus:outline-none focus:ring-2 focus:ring-pink-400">
+                    <i class="fas fa-search absolute right-3 top-3 text-purple-400"></i>
+                </div>
+            </div>
+<!--            &lt;!&ndash; Chat List &ndash;&gt;-->
+<!--            <div class="overflow-y-auto h-[calc(100vh-180px)]">-->
+<!--                <div class="p-4 border-b hover:bg-purple-100 cursor-pointer">-->
+<!--                    <div class="flex items-center space-x-4">-->
+<!--                        &lt;!&ndash;avatar&ndash;&gt;-->
+<!--                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330" class="w-12 h-12 rounded-full object-cover">-->
+<!--                        <div class="flex-1">-->
+<!--                            &lt;!&ndash; username&ndash;&gt;-->
+<!--                            <h4 class="font-semibold text-purple-700">vinhkhuong</h4>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+            <script th:inline="javascript">
+                /*<![CDATA[*/
+                function updateChatHeader(profile) {
+                    console.log(profile.fullName);  // Truy xuất các thuộc tính của profile
+                    console.log(profile.portfolioPhoto);
+                    document.getElementById("chatHeaderUsername").textContent = profile.fullName;
+                    // Tiến hành các xử lý khác với đối tượng profile
+                }
+                /*]]>*/
+            </script>
+
+            <!-- Chat List -->
+            <div class="overflow-y-auto h-[calc(100vh-180px)]">
+                <!-- Duyệt qua danh sách người dùng và hiển thị thông tin -->
+                <div th:each="profile : ${profiles}">
+                    <div class="p-4 border-b hover:bg-purple-100 cursor-pointer" th:onclick="updateChatHeader('${profile.fullName}')" >
+                        <div class="flex items-center space-x-4">
+                            <!-- avatar người dùng -->
+                            <img th:src="@{${profile.portfolioPhoto}}" class="w-12 h-12 rounded-full object-cover" alt="Avatar">
+                            <div class="flex-1">
+                                <!-- username người dùng -->
+                                <h4 class="font-semibold text-purple-700" th:text="${profile.fullName}">Tên người dùng</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Main Chat Area -->
+        <div class="flex-1 flex flex-col">
+            <!-- Chat Header -->
+            <div class="p-4 border-b flex items-center justify-between bg-gradient-to-r from-pink-200 to-purple-200">
+                <div class="flex items-center space-x-4">
+                    <!--avatar-->
+<!--                    <img id="chatHeaderAvatar" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330" class="w-12 h-12 rounded-full object-cover">-->
+<!--                    <div>-->
+<!--                        &lt;!&ndash; username &ndash;&gt;-->
+<!--                        <h3 id="chatHeaderUsername" class="font-semibold text-purple-800">Sarah</h3>-->
+<!--                    </div>-->
+                </div>
+                <div class="flex space-x-4">
+                    <button class="p-2 hover:bg-purple-100 rounded-full"><i class="fas fa-phone text-purple-700"></i></button>
+                    <button class="p-2 hover:bg-purple-100 rounded-full"><i class="fas fa-video text-purple-700"></i></button>
+                    <button class="p-2 hover:bg-purple-100 rounded-full"><i class="fas fa-ellipsis-v text-purple-700"></i></button>
+                </div>
+            </div>
+            <!-- Messages Area -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-4 bg-pink-50" id="chat-messages">
+                <!-- Các tin nhắn sẽ được hiển thị ở đây -->
+            </div>
+
+            <div class="p-2 border-t border-b bg-gradient-to-r from-pink-200 to-purple-200 flex space-x-2 overflow-x-auto">
+                <button class="quick-response px-4 py-2 bg-white rounded-full text-sm border hover:bg-pink-100 text-purple-700 whitespace-nowrap">Available for booking</button>
+                <button class="quick-response px-4 py-2 bg-white rounded-full text-sm border hover:bg-pink-100 text-purple-700 whitespace-nowrap">Send portfolio</button>
+                <button class="quick-response px-4 py-2 bg-white rounded-full text-sm border hover:bg-pink-100 text-purple-700 whitespace-nowrap">Request consultation</button>
+            </div>
+
+            <!-- Input Area -->
+            <div class="p-4 bg-white border-t">
+                <div class="flex items-center space-x-4">
+                    <button class="text-purple-500 hover:text-purple-700"><i class="fas fa-plus"></i></button>
+                    <button class="text-purple-500 hover:text-purple-700"><i class="fas fa-image"></i></button>
+                    <button class="text-purple-500 hover:text-purple-700"><i class="fas fa-paperclip"></i></button>
+                    <input type="text" id="message-input" placeholder="Type a message..." class="flex-1 px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400">
+                    <button id="send-message" class="bg-pink-500 text-white rounded-full p-2 hover:bg-pink-600">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<script>
+    // Kết nối WebSocket
+    var socket = new SockJS('/chat');
+    var stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function (frame) {
+        console.log('Connected: ' + frame);
+
+        // Lắng nghe các tin nhắn từ server
+        stompClient.subscribe('/topic/messages', function (messageOutput) {
+            var message = JSON.parse(messageOutput.body);
+            displayMessage(message);
+        });
+    });
+
+    // Gửi tin nhắn
+    function sendMessage() {
+        var messageInput = document.getElementById('message-input').value;
+        if (messageInput.trim() === '') return; // Nếu không có nội dung tin nhắn, không gửi
+
+        var message = {
+            senderId: 1, // Thay đổi theo người gửi
+            receiverId: 2, // Thay đổi theo người nhận
+            content: messageInput,
+            messageDate: new Date(),
+            isRead: false
+        };
+
+        // Gửi qua WebSocket
+        stompClient.send("/app/sendMessage", {}, JSON.stringify(message));
+
+        // Hiển thị tin nhắn trên giao diện
+        displayMessage(message);
+
+        // Xóa input sau khi gửi
+        document.getElementById('message-input').value = '';
+    }
+
+    // Hiển thị tin nhắn lên giao diện
+    function displayMessage(message) {
+        var messageContainer = document.getElementById('chat-messages');
+
+        // Kiểm tra nếu tin nhắn là của người gửi
+        var isSender = message.senderId === 1; // Thay đổi ID người gửi cho phù hợp
+
+        var messageElement = document.createElement('div');
+        messageElement.classList.add('flex', 'items-start', 'space-x-2');
+
+        // Căn chỉnh tin nhắn bên phải (người gửi) hoặc bên trái (người nhận)
+        if (isSender) {
+            messageElement.classList.add('justify-end');
+        }
+
+        var messageContent = document.createElement('div');
+        messageContent.classList.add('rounded-lg', 'p-3', 'max-w-md');
+
+        // Cài đặt màu nền cho tin nhắn người gửi và người nhận
+        if (isSender) {
+            messageContent.classList.add('bg-pink-500', 'text-white');
+        } else {
+            messageContent.classList.add('bg-purple-100', 'text-purple-700');
+        }
+
+        messageContent.innerHTML = message.content;
+        messageElement.appendChild(messageContent);
+
+        // Thêm thời gian gửi tin nhắn
+        var timestamp = document.createElement('span');
+        timestamp.classList.add('text-xs', 'text-purple-500', 'mt-1', 'block');
+        timestamp.textContent = new Date().toLocaleTimeString();
+        messageElement.appendChild(timestamp);
+
+        messageContainer.appendChild(messageElement);
+    }
+
+
+    // Đảm bảo rằng người dùng có thể gửi tin nhắn khi nhấn Enter hoặc click nút SendMessage
+    document.getElementById('message-input').addEventListener('keypress', function (event) {
+        if (event.key === 'Enter') {
+            sendMessage();
+        }
+    });
+
+    // Sự kiện click nút gửi tin nhắn
+    document.getElementById('send-message').addEventListener('click', function () {
+        sendMessage();
+    })
+
+
+
+    // Hàm để cập nhật thông tin vào chat header
+    function updateChatHeader(username) {
+        // Cập nhật tên người dùng
+        document.getElementById("chatHeaderUsername").textContent = username;
+
+        // // Cập nhật avatar người dùng
+        // document.getElementById("chatHeaderAvatar").src = avatarUrl;
+    }
+
+
+
+</script>
+
+
+</body>
+</html>

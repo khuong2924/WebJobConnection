@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  springboot-app:
+    build: .
+    container_name: jobConnectionSystem
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql-db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/jobconnectionsystem
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 123456
+    restart: always
+
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: jobconnectionsystem
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./backup.sql:/docker-entrypoint-initdb.d/backup.sql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  mysql-data:
+    driver: local
