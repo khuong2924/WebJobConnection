@@ -13,7 +13,7 @@ By automating these processes, the system reduces manual intervention and enhanc
 
 Moreover, the platform integrates essential business modules to drive growth:
 
-- **Online Payments**: Integrated with **Stripe** for seamless payment processing.
+- **Online Payments**: Integrated with **PayPal Sanbox** for seamless payment processing.
 - **Service Ratings**: Allows customers to rate services, ensuring quality and customer satisfaction.
 - **Promotional Collaborations**: Supports partnerships with brands for cross-promotion.
 - **Upgraded Service Packages**: Offers premium services to generate sustainable revenue streams.
@@ -35,7 +35,7 @@ This was the project I developed the most independently, as the tutorials I foll
 - **Bootstrap**: CSS framework for responsive, mobile-first web design.
 - **Hibernate**: ORM framework for efficient database operations.
 - **JWT**: Token-based authentication and authorization.
-- **Stripe**: Payment processing integration.
+- **PayPal Sanbox**: Payment processing integration.
 - **Docker**: Containerization for consistent and reproducible environments.
 
 ## 🚀 Features
@@ -61,7 +61,7 @@ To run this project locally, follow these steps:
    DB_PASSWORD=your_db_password
    DB_URL=your_db_url/e-commerce
    
-   PAYPAL_SECRET_KEY=your_stripe_secret_key
+   PAYPAL_SECRET_KEY=your_PayPal Sanbox_secret_key
    
    CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
    CLOUDINARY_API_KEY=your_cloudinary_api_key
